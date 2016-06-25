@@ -111,11 +111,11 @@ namespace ts {
         if (diagnostic.file) {
             const { line, character } = getLineAndCharacterOfPosition(diagnostic.file, diagnostic.start);
             const relativeFileName = getRelativeFileName(diagnostic.file.fileName, host);
-            output += `${ relativeFileName }(${ line + 1 },${ character + 1 }): `;
+            output += `${relativeFileName}(${line + 1},${character + 1}): `;
         }
 
         const category = DiagnosticCategory[diagnostic.category].toLowerCase();
-        output += `${ category } TS${ diagnostic.code }: ${ flattenDiagnosticMessageText(diagnostic.messageText, sys.newLine) }${ sys.newLine }`;
+        output += `${category} TS${diagnostic.code}: ${flattenDiagnosticMessageText(diagnostic.messageText, sys.newLine)}${sys.newLine}`;
 
         sys.write(output);
     }
@@ -196,12 +196,12 @@ namespace ts {
             }
 
             output += sys.newLine;
-            output += `${ relativeFileName }(${ firstLine + 1 },${ firstLineChar + 1 }): `;
+            output += `${relativeFileName}(${firstLine + 1},${firstLineChar + 1}): `;
         }
 
         const categoryColor = categoryFormatMap[diagnostic.category];
         const category = DiagnosticCategory[diagnostic.category].toLowerCase();
-        output += `${ formatAndReset(category, categoryColor) } TS${ diagnostic.code }: ${ flattenDiagnosticMessageText(diagnostic.messageText, sys.newLine) }`;
+        output += `${formatAndReset(category, categoryColor)} TS${diagnostic.code}: ${flattenDiagnosticMessageText(diagnostic.messageText, sys.newLine)}`;
         output += sys.newLine + sys.newLine;
 
         sys.write(output);
@@ -212,10 +212,10 @@ namespace ts {
 
         if (diagnostic.file) {
             const loc = getLineAndCharacterOfPosition(diagnostic.file, diagnostic.start);
-            output += `${ diagnostic.file.fileName }(${ loc.line + 1 },${ loc.character + 1 }): `;
+            output += `${diagnostic.file.fileName}(${loc.line + 1},${loc.character + 1}): `;
         }
 
-        output += `${ flattenDiagnosticMessageText(diagnostic.messageText, sys.newLine) }${ sys.newLine }`;
+        output += `${flattenDiagnosticMessageText(diagnostic.messageText, sys.newLine)}${sys.newLine}`;
 
         sys.write(output);
     }
@@ -357,7 +357,34 @@ namespace ts {
                     watchedDirectoryChanged, /*recursive*/ true);
             }
         }
+        function rpcCompile() {// entry point
+            if (!cachedProgram) {
+                if (configFileName) {
+                    const configParseResult = parseConfigFile();
+                    rootFileNames = configParseResult.fileNames;
+                    compilerOptions = configParseResult.options;
+                }
+                else {
+                    rootFileNames = commandLine.fileNames;
+                    compilerOptions = commandLine.options;
+                }
+                compilerHost = createCompilerHost(compilerOptions);
+                hostGetSourceFile = compilerHost.getSourceFile;
+                compilerHost.getSourceFile = getSourceFile;
 
+                hostFileExists = compilerHost.fileExists;
+                compilerHost.fileExists = cachedFileExists;
+            }
+
+            if (compilerOptions.pretty) {
+                reportDiagnostic = reportDiagnosticWithColorAndContext;
+            }
+
+            // reset the cache of existing files
+            cachedExistingFiles = {};
+            rpc.emitClient(rootFileNames, compilerOptions, compilerHost);
+        }
+        rpcCompile();
         performCompilation();
 
         function parseConfigFile(): ParsedCommandLine {
@@ -421,7 +448,7 @@ namespace ts {
                 compilerHost = createCompilerHost(compilerOptions);
                 hostGetSourceFile = compilerHost.getSourceFile;
                 compilerHost.getSourceFile = getSourceFile;
-                
+
                 hostFileExists = compilerHost.fileExists;
                 compilerHost.fileExists = cachedFileExists;
             }
@@ -546,6 +573,7 @@ namespace ts {
         function recompile() {
             timerHandleForRecompilation = undefined;
             reportWatchDiagnostic(createCompilerDiagnostic(Diagnostics.File_change_detected_Starting_incremental_compilation));
+            rpcCompile();
             performCompilation();
         }
         tscDebugger.exit('executeCommandLine');
@@ -613,7 +641,7 @@ namespace ts {
                     diagnostics = program.getSemanticDiagnostics();
                 }
             }
-            
+
             // Otherwise, emit and report any errors we ran into.
             tscDebugger.comment('Before emit');
             const emitOutput = program.emit();
