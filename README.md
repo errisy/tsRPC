@@ -50,11 +50,12 @@ ts.executeCommandLine(ts.sys.args); //this is the entry point
 ```
 
 ## Results:
-### It workds for node
+### It workds for node **Recommended**
 Simply use node to run tsc.js as following to compile the ts files in folder obj.
 ```
-node tsc.js -p obj
+node tsc2.js -w -p obj
 ```
+when you use -p, you'd better use it from higher level of folder. use the same folder may cause **Error: watch  ENOENT**.
 
 ### This works for tsc.exe
 You can normally find tsc at:
@@ -64,10 +65,13 @@ C:\Program Files (x86)\Microsoft SDKs\TypeScript\1.8
 To use it with tsc.exe, all console must be removed.
 
 ## Issues:
-Visual Studio is not using tsc.exe to compile TypeScript files.
+### Visual Studio is not using tsc.exe to compile TypeScript files.
 It seems that Visual Studio is using LanguageService/typescriptService in the IDE to compile after file changed.
 So it's becoming hard to hack into Visual Studio.
 Alternative choice could be use a file watch system.
+### TypeScript Compiler Versions are differenct
+The tsc.js (1718K in size) of NodeJS is different from the the official v1.8 tsc.js (1748K). And even the SyntaxKind codes are different. The OpenSource version from GitHub usually come with some errors (probably because they are in the middle for the next version.
 
+## Further Application:
+### This approach can be used for writing interfaces for other languages.
 
-  
