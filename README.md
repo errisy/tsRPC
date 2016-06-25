@@ -35,7 +35,7 @@ ts.executeCommandLine(ts.sys.args); //this is the entry point
   ... //loading config file, etc. no compilation done here;
   (2) function performCompilation{ //the function for parsing and compiling
     //this seems the place where additional files can be inserted!
-    **rpc.emitClient(rootFileNames, compilerOptions, compilerHost);**
+    rpc.emitClient(rootFileNames, compilerOptions, compilerHost); // it is here now!!
     //
     const compileResult = (3)compile(rootFileNames, compilerOptions, compilerHost);
   }
