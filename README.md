@@ -30,7 +30,7 @@ This seems to be a better solution.
 ts.executeCommandLine(ts.sys.args); //this is the entry point
 ```
 ```typescript
-//tsc.ts at the end of the file:
+//tsc.ts:
 (1) function executeCommandLine{
   ... //loading config file, etc. no compilation done here;
   (2) function performCompilation{ //the function for parsing and compiling
@@ -48,6 +48,55 @@ ts.executeCommandLine(ts.sys.args); //this is the entry point
   ...
 }
 ```
+
+#### Still Wrong with FileWatch
+We need to do rpcCompile for both compile and recompile (triggered by filewatcher).
+Each source file was watched individually. So the following to code was added before 
+```typescript
+//tsc.ts -> executeCommandLine:
+...
+        function rpcCompile() {// entry point
+            if (!cachedProgram) {
+                if (configFileName) {
+                    const configParseResult = parseConfigFile();
+                    rootFileNames = configParseResult.fileNames;
+                    compilerOptions = configParseResult.options;
+                }
+                else {
+                    rootFileNames = commandLine.fileNames;
+                    compilerOptions = commandLine.options;
+                }
+                compilerHost = createCompilerHost(compilerOptions);
+                hostGetSourceFile = compilerHost.getSourceFile;
+                compilerHost.getSourceFile = getSourceFile;
+
+                hostFileExists = compilerHost.fileExists;
+                compilerHost.fileExists = cachedFileExists;
+            }
+
+            if (compilerOptions.pretty) {
+                reportDiagnostic = reportDiagnosticWithColorAndContext;
+            }
+
+            // reset the cache of existing files
+            cachedExistingFiles = {};
+            rpc.emitClient(rootFileNames, compilerOptions, compilerHost);
+        }
+        rpcCompile(); // rpcCompile must be inserted before performCompilation.
+        performCompilation(); 
+...
+        function recompile() {
+            timerHandleForRecompilation = undefined;
+            reportWatchDiagnostic(createCompilerDiagnostic(Diagnostics.File_change_detected_Starting_incremental_compilation));
+            rpcCompile(); // again, rpcCompile must be inserted before performCompilation.
+            performCompilation();
+        }
+...
+```
+That made it work fine with file watcher.
+
+#### Adding those code to other version tsc.js?
+Not easy to get them working, because different version has different SyntaxKind enum, which is pretty hard to work out from js file. The version used in this project was obtained from (TypeScript)[https://github.com/Microsoft/TypeScript/tree/master/src/compiler] on April 26th, 2016.
 
 ## Results:
 ### It workds for node **Recommended**
