@@ -587,7 +587,14 @@ namespace ts {
         bindTime = 0;
         checkTime = 0;
         emitTime = 0;
+
+        //modified here; Set no Emit here will tell the compiler not to write any js files;
+        //we only want this compiler to create RPC files for us;
+        //we may further have other RPC files for other languages;
+        //compilerOptions.noEmit = true;
+
         const program = createProgram(fileNames, compilerOptions, compilerHost);
+        
         tscDebugger.comment('createProgram done');
         const exitStatus = compileProgram();
         tscDebugger.comment('compileProgram done');
@@ -623,6 +630,7 @@ namespace ts {
             reportTimeStatistic("Total time", programTime + bindTime + checkTime + emitTime);
         }
         tscDebugger.exit('compile', fileNames);
+        
         return { program, exitStatus };
 
         function compileProgram(): ExitStatus {

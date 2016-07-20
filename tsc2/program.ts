@@ -855,9 +855,11 @@ namespace ts {
                 ensureDirectoriesExist(getDirectoryPath(normalizePath(fileName)));
 
                 if (isWatchSet(options) && sys.createHash && sys.getModifiedTime) {
+                    //modified here
                     writeFileIfUpdated(fileName, data, writeByteOrderMark);
                 }
                 else {
+                    //modified here
                     sys.writeFile(fileName, data, writeByteOrderMark);
                 }
 

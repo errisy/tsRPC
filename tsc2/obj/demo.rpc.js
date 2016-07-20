@@ -10,7 +10,7 @@ var rpc_ts_1 = require('./rpc.ts');
 var Demo = (function () {
     function Demo() {
     }
-    Demo.prototype.Dogs = function () {
+    Demo.prototype.Dogs = function (hello) {
         var list = [];
         {
             var c = 20;

@@ -3,7 +3,7 @@ import {rpcService, rpcMember} from './rpc.ts';
 
 @rpcService
 export class Demo {
-    public Dogs(): Dog[] {
+    public Dogs(hello:string): Dog[] {
         let list: Dog[] = [];
         {
             let c: number = 20;

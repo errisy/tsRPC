@@ -7,6 +7,5 @@ C:\HTTP\tsc2\tsc2\obj\Debug\tsc2.pdb
 C:\HTTP\tsRPC\tsc2\bin\tsc2.dll.config
 C:\HTTP\tsRPC\tsc2\bin\tsc2.dll
 C:\HTTP\tsRPC\tsc2\bin\tsc2.pdb
-C:\HTTP\tsRPC\tsc2\obj\Debug\tsc2.csprojResolveAssemblyReference.cache
 C:\HTTP\tsRPC\tsc2\obj\Debug\tsc2.dll
 C:\HTTP\tsRPC\tsc2\obj\Debug\tsc2.pdb
